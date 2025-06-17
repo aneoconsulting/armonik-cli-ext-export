@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[project]
+name = "armonik-cli-ext-export"
+version = "0.1.0"
+description = "Various commands to export/import metrics/logs from ArmoniK."
+readme = "README.md"
+requires-python = ">=3.10.12"
+dependencies = [
+    "boto3>=1.38.37",
+    "kr8s>=0.20.7",
+    #"armonik-cli-core"
+]
+
+# [tool.uv.sources]
+# armonik-cli-core = { git = "https://github.com/aneoconsulting/ArmoniK.CLI.git", subdirectory = "packages/armonik_cli_core", branch = "ad/extension-support" }
+
+[project.entry-points."armonik.cli.extensions"]
+export = "armonik_cli_ext_export.exporters.export:export_group"
+
+[project.urls]
+"Homepage" = "https://github.com/aneoconsulting/armonik-cli-ext-export"
+"Bug Tracker" = "https://github.com/aneoconsulting/armonik-cli-ext-export/issues"
+
+[dependency-groups]
+dev = [
+    'ruff'
+]

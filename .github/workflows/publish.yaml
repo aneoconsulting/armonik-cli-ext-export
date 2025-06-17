@@ -1,0 +1,33 @@
+name: Python Package
+
+on:
+  pull_request:
+    branches:
+      - main
+  release:
+    types: [published]
+
+jobs:
+  build-publish:
+    name: Build and publish package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Build armonik-cli-ext-export
+        run: uv build
+
+      - name: Publish armonik-cli-ext-export to PyPi
+        if: github.event_name == 'release' # Publish on releases
+        run: uv publish -t ${{ secrets.PYPI_CLI_TOKEN }} 

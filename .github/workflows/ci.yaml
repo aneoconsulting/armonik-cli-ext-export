@@ -1,0 +1,88 @@
+name: Code Integration
+
+on:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code-quality:
+    name: Check linting, formatting and typing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+  
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Linting
+        run: uv run ruff check .
+
+      - name: Type checking
+        run: uv run mypy .
+
+      - name: Formatting
+        run: uv run ruff format .
+
+      - name: Check Diff
+        run: |
+          DIFF="$(git diff --name-only)"
+
+          if [ -z "$DIFF" ]; then
+            echo "OK: Format is clean"
+          else
+            echo "Error: Format was not clean"
+            echo "List of files:"
+            echo "$DIFF"
+            git diff
+            exit 1
+          fi
+
+  # Barely have the time to finish this let alone write unit tests lmao
+  # testing:
+  #   name: Test Python Package
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+  #       with:
+  #         fetch-depth: 0
+
+  #     - name: Install uv
+  #       uses: astral-sh/setup-uv@v5
+    
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version-file: ".python-version"
+
+  #     - name: Testing
+  #       run: uv run pytest
+
+  #     - name: Get Report
+  #       uses: orgoro/coverage@3f13a558c5af7376496aa4848bf0224aead366ac
+  #       with:
+  #         coverageFile: coverage.xml
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+
+  #     - name: Archive code coverage results html
+  #       uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a
+  #       with:
+  #         name: code-coverage-report-html
+  #         path: coverage_report
+
+  #     - name: Archive code coverage results xml
+  #       uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a
+  #       with:
+  #         name: code-coverage-report-xml
+  #         path: coverage.xml
